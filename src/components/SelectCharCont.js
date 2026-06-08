@@ -28,7 +28,6 @@ import { Grid } from 'semantic-ui-react'
   height: 1000}
 
   render(){
-    debugger
     return(
       <div style={this.backgroundStyle} className="course-image">
         <Grid>  

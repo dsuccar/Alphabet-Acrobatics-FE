@@ -10,7 +10,8 @@ class NewUser extends React.Component {
     super()
     this.state = {
       username: "",
-      password: ""
+      password: "",
+      userExists: false
     }
   }
 
@@ -22,9 +23,13 @@ class NewUser extends React.Component {
       username: this.state.username,
       password: this.state.password
     }
+
+    
     this.props.newUser(user)
-  
-    this.setState({ username: "", password: "" })
+
+
+    // no idea why the following line was in here
+    // this.setState({ username: "", password: "" })
   }
   
   handleChange = (event) => {
@@ -38,7 +43,7 @@ class NewUser extends React.Component {
 
   
   render() {
-    console.log("user card",this.state)
+    console.log(this.state)
     return (
 
       <Grid columns='equal' style={this.newUser}>
@@ -50,22 +55,35 @@ class NewUser extends React.Component {
           <Segment placeholder >
           <Grid columns={2}  >
             
-      
             <Grid.Column verticalAlign='middle'>
-              <Button content='Sign In' icon='sign-in' size='big'  as={Link} to="/" />
+              <Button content='Sign In' 
+              icon='sign-in' 
+              size='big' 
+               as={Link} 
+               to="/" 
+               />
             </Grid.Column>
           
           <Grid.Column >
             <h1>New User:</h1>
               <Form>
                 <Form.Input
-                  placeholder='Username' name='username' type='text' onChange={this.handleChange}
+                  placeholder='Username' 
+                  name='username' 
+                  type='text' 
+                  onChange={this.handleChange}
                 />
                 <Form.Input
-                placeholder='password' name='password' type='text' onChange={this.handleChange} 
+                placeholder='password' 
+                name='password' 
+                type='text' 
+                onChange={this.handleChange} 
               />
         
-                <Button content='submit' value='Sign In' onClick={this.handleSubmit} />
+                <Button 
+                content='submit' 
+                value='Sign In' 
+                onClick={this.handleSubmit} />
               </Form>
             </Grid.Column>
             </Grid>
@@ -73,9 +91,7 @@ class NewUser extends React.Component {
         </Segment>
         </Segment>
       </Grid.Column>
-      <Grid.Column>
-        
-      </Grid.Column>
+      <Grid.Column></Grid.Column>
     </Grid>
 
     );

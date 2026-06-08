@@ -36,8 +36,9 @@ export default class BattleContainer extends React.Component {
   componentDidMount(){
     
 
-  fetch(`http://localhost:3000/rappers/${this.props.selectedRapper.id}`)
-  .then(resp => resp.json())
+    // fetch(`http://localhost:3000/rappers/${this.props.selectedRapper.id}`)
+    fetch(`http://localhost:3000/rappers/2`)
+    .then(resp => resp.json())
   .then(userRapper => this.setState({
     userRapperInfo: {
       name: userRapper.name,

@@ -29,7 +29,7 @@ class Signin extends Component {
     }
     
     this.props.submitUser(user)
-    // this.props.findBoss(user)
+  
   
     this.setState({ username: "", password: "" })
   }
@@ -50,6 +50,7 @@ class Signin extends Component {
     paddingTop: "50px"
   }
   render() {
+    console.log(this.state)
     return (
       <div>
       

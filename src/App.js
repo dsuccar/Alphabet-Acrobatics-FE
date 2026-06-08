@@ -66,6 +66,7 @@ class App extends React.Component {
 
   // Creates a new user adds to db. 
   newUser = (user) => {
+    
     fetch('http://localhost:3000/users/', {
       method: "POST", 
       headers: {
