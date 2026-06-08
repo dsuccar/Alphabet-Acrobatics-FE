@@ -49,7 +49,8 @@ class App extends React.Component {
   // Log in with existing user: if username is in database and password matches then it sets user
   // NEEDS TO BE MOVED TO BE
   submitUser = (user) => {
-    fetch("http://localhost:3000/users")
+
+     fetch("http://localhost:3000/users")
       .then(resp => resp.json())
       .then(allUsers =>
         allUsers.forEach(pastUser => {
@@ -66,6 +67,17 @@ class App extends React.Component {
 
   // Creates a new user adds to db. 
   newUser = (user) => {
+    const newUser = user
+
+    fetch('http://localhost:3000/users')
+    .then(resp => resp.json())
+    .then(users => {
+      // this.setState({
+      //   bossRapper: rappers.find(rap=> rap.isboss===true)
+      // })
+      
+    }
+  )
     
     fetch('http://localhost:3000/users/', {
       method: "POST", 

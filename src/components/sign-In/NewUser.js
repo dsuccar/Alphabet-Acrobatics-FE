@@ -15,7 +15,8 @@ class NewUser extends React.Component {
     }
   }
 
-  
+
+   
   
   handleSubmit = (event) => {
     event.preventDefault()
@@ -23,6 +24,21 @@ class NewUser extends React.Component {
       username: this.state.username,
       password: this.state.password
     }
+
+//    fetch("http://localhost:3000/users")
+//       .then(resp => resp.json())
+//       .then(allUsers =>
+//         allUsers.forEach(pastUser => {
+          
+//            if(
+//             pastUser.username === user.username 
+//             && pastUser.password === user.password) 
+//             {
+//       this.setState({user: pastUser})
+//     }
+//   })
+// )
+           
 
     
     this.props.newUser(user)
