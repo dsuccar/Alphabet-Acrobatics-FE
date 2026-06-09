@@ -15,38 +15,50 @@ class NewUser extends React.Component {
     }
   }
 
-
-   
-  
   handleSubmit = (event) => {
-    event.preventDefault()
-    const user = {
-      username: this.state.username,
-      password: this.state.password
-    }
+  event.preventDefault()
 
-//    fetch("http://localhost:3000/users")
-//       .then(resp => resp.json())
-//       .then(allUsers =>
-//         allUsers.forEach(pastUser => {
-          
-//            if(
-//             pastUser.username === user.username 
-//             && pastUser.password === user.password) 
-//             {
-//       this.setState({user: pastUser})
-//     }
-//   })
-// )
-           
+  const user = {
+    username: this.state.username,
+    password: this.state.password
+  }
+
+  fetch('http://localhost:3000/users/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(user)
+  })
+    .then(resp => resp.json())
+    .then(createdUser => {
+  this.props.setUser(createdUser)
+  this.props.history.push('/select_rapper')
+})
+}
+   
+   //Trying something
+  // handleSubmit = (event) => {
+  //   event.preventDefault()
+  //   const user = {
+  //     username: this.state.username,
+  //     password: this.state.password
+  //   }
+  //   this.props.newUser(user)
+  // }
+   
+    
+ 
 
     
-    this.props.newUser(user)
 
 
     // no idea why the following line was in here
     // this.setState({ username: "", password: "" })
-  }
+  
+
+   
+   
   
   handleChange = (event) => {
     this.setState({

@@ -22,10 +22,8 @@ class App extends React.Component {
     }
   }
 
-
- 
+ // when page loades it gets collection of bosses and rappers
   componentDidMount(){
-
 // collection of bosses
     fetch('http://localhost:3000/rappers')
     .then(resp => resp.json())
@@ -64,34 +62,11 @@ class App extends React.Component {
     )
 
   }
-
-  // Creates a new user adds to db. 
-  newUser = (user) => {
-    const newUser = user
-
-    fetch('http://localhost:3000/users')
-    .then(resp => resp.json())
-    .then(users => {
-      // this.setState({
-      //   bossRapper: rappers.find(rap=> rap.isboss===true)
-      // })
-      
-    }
-  )
-    
-    fetch('http://localhost:3000/users/', {
-      method: "POST", 
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(user)
-    })
-    this.setState({user: user})
-    this.props.history.push(`/select_rapper`)
+// updates new user
+setUser = (user) => {
+  this.setState({ user })
+}
         
-          } 
-        
-// Sending selectRapper to RapperCard.js
 
   selectRapper = (rapper) =>{
     
@@ -158,16 +133,26 @@ endGame = (bossRapper,userRapper) => {
                       return <Signin submitUser={this.submitUser}/>}}
                   />
 
-                <Route exact path='/new_user' render={()=>{
-                      return <NewUser newUser={this.newUser}/>}}
-                  />
+                <Route 
+                exact 
+                path='/new_user' 
+                render={()=>{
+                  return <NewUser 
+                            user={this.state.user}
+                            setUser={this.setUser}
+                            />}}
+                          />
                 
-                <Route exact path='/select_rapper' render={()=>{
-                      return <SelectCharCont 
-                                rapperList={this.state.rapperList}
-                                selectRapper={this.selectRapper}/>}}
-                  />
-                
+                <Route 
+                exact 
+                path='/select_rapper' 
+                render={()=>{
+                  return <SelectCharCont 
+                            rapperList={this.state.rapperList}
+                            selectRapper={this.selectRapper}
+                            />}}
+                        />
+
                 <Route exact path='/battle' render={()=>{
                       return <BattleContainer 
                                 bossRapper={this.state.bossRapper}   
