@@ -24,12 +24,27 @@ class Signin extends Component {
 
   handleSubmit = (event) => {
     event.preventDefault()
-    const user = {
-      username: this.state.username,
-      password: this.state.password
-    }
-    
-    this.props.submitUser(user)
+
+      const user = {
+          username: this.state.username,
+          password: this.state.password
+        }
+
+    fetch("http://localhost:3000/users")
+      .then(resp => resp.json())
+      .then(allUsers =>
+        allUsers.forEach(pastUser => {
+          
+           if( pastUser.username === user.username && 
+            pastUser.password === user.password) {
+              
+      this.props.setUser({pastUser})
+      this.props.history.push(`/select_rapper`)
+      
+        } 
+      })
+    )
+
   
   
     this.setState({ username: "", password: "" })

@@ -44,26 +44,8 @@ class App extends React.Component {
   }
 
 
-  // Log in with existing user: if username is in database and password matches then it sets user
-  // NEEDS TO BE MOVED TO BE
-  submitUser = (user) => {
-
-     fetch("http://localhost:3000/users")
-      .then(resp => resp.json())
-      .then(allUsers =>
-        allUsers.forEach(pastUser => {
-          
-           if(pastUser.username === user.username && pastUser.password === user.password) {
-      this.setState({user: pastUser})
-      this.props.history.push(`/select_rapper`)
-      
-        } 
-      })
-    )
-
-  }
-// updates new user
-setUser = (user) => {
+// updates state after user signs in
+  setUser = (user) => {
   this.setState({ user })
 }
         
@@ -127,11 +109,15 @@ endGame = (bossRapper,userRapper) => {
     return (
 
       <div className="App">
-             {<NavBar user={this.state.user} logout={this.handleLogout} state={this.state}/>}
+             <NavBar 
+              user={this.state.user} 
+              logout={this.handleLogout} 
+              state={this.state}/>
              <Switch>
-                <Route exact path='/' render={()=>{
-                      return <Signin submitUser={this.submitUser}/>}}
-                  />
+                <Route exact
+                        path='/'
+                        render={()=>{
+                      return <Signin setUser={this.setUser}/>}} />
 
                 <Route 
                 exact 

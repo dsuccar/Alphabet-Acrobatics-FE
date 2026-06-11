@@ -36,29 +36,6 @@ class NewUser extends React.Component {
   this.props.history.push('/select_rapper')
 })
 }
-   
-   //Trying something
-  // handleSubmit = (event) => {
-  //   event.preventDefault()
-  //   const user = {
-  //     username: this.state.username,
-  //     password: this.state.password
-  //   }
-  //   this.props.newUser(user)
-  // }
-   
-    
- 
-
-    
-
-
-    // no idea why the following line was in here
-    // this.setState({ username: "", password: "" })
-  
-
-   
-   
   
   handleChange = (event) => {
     this.setState({
