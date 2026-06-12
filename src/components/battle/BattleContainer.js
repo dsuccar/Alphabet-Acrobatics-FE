@@ -37,7 +37,7 @@ export default class BattleContainer extends React.Component {
     
 
     // fetch(`http://localhost:3000/rappers/${this.props.selectedRapper.id}`)
-    fetch(`http://localhost:3000/rappers/2`)
+    fetch(`http://localhost:3000/rappers/${this.props.selectedRapper.id}`)
     .then(resp => resp.json())
   .then(userRapper => this.setState({
     userRapperInfo: {
@@ -208,7 +208,7 @@ backgroundStyle=
 
 
   render(){
-    console.log(this.state.userRapperInfo.name)
+    // console.log(this.state.userRapperInfo.name)
     return(
 
       

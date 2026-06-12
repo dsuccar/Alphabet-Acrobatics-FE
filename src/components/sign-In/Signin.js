@@ -11,7 +11,8 @@ class Signin extends Component {
     this.state = {
       username: "",
       password: "",
-      allUsers: []
+      allUsers: [],
+      error:''
     }
   }
 
@@ -40,8 +41,9 @@ class Signin extends Component {
               
       this.props.setUser({pastUser})
       this.props.history.push(`/select_rapper`)
-      
-        } 
+          } else {
+            this.setState({error : "The username or password you've entered is incorrect."})
+          }
       })
     )
 
@@ -57,7 +59,8 @@ class Signin extends Component {
       password: "123456"
     }
     
-    this.props.submitUser(user)
+    this.props.setUser(user)
+    this.props.history.push(`/select_rapper`)
    
     this.setState({ username: "", password: "" })
   }
@@ -73,16 +76,15 @@ class Signin extends Component {
       <Grid columns='equal' style={this.signIn}>
         
     <Grid.Column >
-  
     </Grid.Column>
     
     <Grid.Column  >
  
     <h4> Sign in to keep track of wins, or continue on as a guest below to get right to the action</h4>
       <Segment>
-        
         <Segment placeholder >
         <Grid columns={2}  >
+          
           <Grid.Column >
           <h1>Sign In:</h1>
             <Form>
@@ -120,6 +122,7 @@ class Signin extends Component {
     
         <Divider vertical>Or</Divider>
       </Segment>
+      <h5>{this.state.error}</h5>
       </Segment>
     </Grid.Column>
     <Grid.Column>

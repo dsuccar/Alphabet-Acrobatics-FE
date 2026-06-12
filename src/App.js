@@ -4,7 +4,7 @@ import './App.css';
 import Signin from './components/sign-In/Signin'
 import NewUser from './components/sign-In/NewUser'
 import NavBar from './components/NavBar';
-import SelectCharCont from './components/SelectCharCont'
+import SelectCharCont from './components/character_selection/SelectRapperScreen'
 import BattleContainer from './components/battle/BattleContainer'
 import EndGame from './components/EndGame'
 import WinnerEndGame from './components/WinnerEndGame'
@@ -44,30 +44,44 @@ class App extends React.Component {
   }
 
 
-// updates state after user signs in
-  setUser = (user) => {
+  // Log in with existing user: if username is in database and password matches then it sets user
+  // NEEDS TO BE MOVED TO BE
+  submitUser = (user) => {
+
+     fetch("http://localhost:3000/users")
+      .then(resp => resp.json())
+      .then(allUsers =>
+        allUsers.forEach(pastUser => {
+          
+           if(pastUser.username === user.username && pastUser.password === user.password) {
+      this.setState({user: pastUser})
+      this.props.history.push(`/select_rapper`)
+      
+        } 
+      })
+    )
+
+  }
+// updates new user
+setUser = (user) => {
   this.setState({ user })
 }
         
-
+// giving select rapper page access to user?
   selectRapper = (rapper) =>{
     
-    const userObj = {
-      artist_id: rapper.id,
-      username: this.state.user.username,
-      password: this.state.user.password,
-      // badges:'wind' 
+    this.setState({selectedRapper:rapper})
     }
-    
-    fetch(`http://localhost:3000/users/${this.state.user.id}`)
-      .then(response => response.json())
-      .then( 
-        this.setState({
-        selectedRapper: rapper
-      }))
+  // this does nothing
+    // fetch(`http://localhost:3000/users/${this.state.user.id}`)
+    //   .then(response => response.json())
+    //   .then( 
+    //     this.setState({
+    //     selectedRapper: rapper
+    //   }))
     
 
-  }
+  
 
 /**
 this only gets called when a rapper hits 0
@@ -117,7 +131,10 @@ endGame = (bossRapper,userRapper) => {
                 <Route exact
                         path='/'
                         render={()=>{
-                      return <Signin setUser={this.setUser}/>}} />
+                      return <Signin 
+                      submitUser={this.submitUser}
+                      setUser={this.setUser}
+                      />}} />
 
                 <Route 
                 exact 

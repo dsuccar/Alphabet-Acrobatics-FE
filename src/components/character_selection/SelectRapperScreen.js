@@ -1,5 +1,5 @@
 import React from 'react'
-import RapperCard from './battle/RapperCard'
+import RapperCard from './RapperCard'
 import { Grid } from 'semantic-ui-react'
 
 

@@ -12,8 +12,7 @@ import { withRouter } from 'react-router-dom';
   }
 
 
-    handleClick = () => {
-      
+    handleClick = (test) => {
       this.props.selectRapper(this.props.rapper)
       this.props.history.push("battle")
 
