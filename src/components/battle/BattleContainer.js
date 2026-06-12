@@ -1,6 +1,7 @@
 import UserCard from './UserCard'
 import LyricContainer from './LyricContainer'
 import BossCard from './BossCard'
+import GuessTheLyric from '../GuessTheLyric'
 import React from 'react'
 import update from 'immutability-helper'
 
@@ -219,6 +220,10 @@ backgroundStyle=
         <Grid.Column>
         </Grid.Column>
         <Grid.Column verticalAlign='middle'>
+        <Segment>
+           <GuessTheLyric
+           selectedRapper = {this.state.userRapperInfo}/>
+        </Segment>
         <Segment>
           {/*if user tuturn then user information, else boss info*/}
             {this.state.userRapperInfo.myTurn === true

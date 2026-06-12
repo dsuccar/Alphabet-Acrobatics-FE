@@ -9,6 +9,9 @@ import BattleContainer from './components/battle/BattleContainer'
 import EndGame from './components/EndGame'
 import WinnerEndGame from './components/WinnerEndGame'
 import { Route, withRouter, Switch } from 'react-router-dom'
+import GuessTheLyric from './components/GuessTheLyric'
+
+
 
 
 class App extends React.Component {
@@ -131,10 +134,11 @@ endGame = (bossRapper,userRapper) => {
                 <Route exact
                         path='/'
                         render={()=>{
+                          
                       return <Signin 
                       submitUser={this.submitUser}
-                      setUser={this.setUser}
-                      />}} />
+                      setUser={this.setUser} />
+                      }} />
 
                 <Route 
                 exact 
