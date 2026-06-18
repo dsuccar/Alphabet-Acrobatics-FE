@@ -36,7 +36,6 @@ import { Grid } from 'semantic-ui-react'
           
           <Grid.Column key={rapper.id} style={this.selectCharStyle}>
             <RapperCard 
-            
             rapper={rapper}
             selectRapper={this.props.selectRapper}
           />

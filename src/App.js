@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
 import './App.css';
 import Signin from './components/sign-In/Signin'
@@ -9,177 +10,108 @@ import BattleContainer from './components/battle/BattleContainer'
 import EndGame from './components/EndGame'
 import WinnerEndGame from './components/WinnerEndGame'
 import { Route, withRouter, Switch } from 'react-router-dom'
-import GuessTheLyric from './components/GuessTheLyric'
+import { setUser, logout } from './store/userSlice'
+import { fetchRappers, selectRapper } from './store/rappersSlice'
 
 
 
 
 class App extends React.Component {
-  constructor() {
-    super()
-    this.state = {
-      user: null,
-      rapperList: [],
-      bossRapper: null,
-      selectedRapper: null
-    }
-  }
 
- // when page loades it gets collection of bosses and rappers
+ // when page loads it gets collection of bosses and rappers
   componentDidMount(){
-// collection of bosses
-    fetch('http://localhost:3000/rappers')
-    .then(resp => resp.json())
-    .then(rappers => {
-      this.setState({
-        rapperList: rappers.filter(rap => rap.isboss === false)
-      })
-    })
-
-// collection of user rappers
-    fetch('http://localhost:3000/rappers')
-    .then(resp => resp.json())
-    .then(rappers => {
-      this.setState({
-        bossRapper: rappers.find(rap=> rap.isboss===true)
-      })
-    })
+    this.props.fetchRappers()
   }
 
-
-  // Log in with existing user: if username is in database and password matches then it sets user
-  // NEEDS TO BE MOVED TO BE
-  submitUser = (user) => {
-
-     fetch("http://localhost:3000/users")
-      .then(resp => resp.json())
-      .then(allUsers =>
-        allUsers.forEach(pastUser => {
-          
-           if(pastUser.username === user.username && pastUser.password === user.password) {
-      this.setState({user: pastUser})
-      this.props.history.push(`/select_rapper`)
-      
-        } 
-      })
-    )
-
-  }
-// updates new user
-setUser = (user) => {
-  this.setState({ user })
-}
-        
-// giving select rapper page access to user?
-  selectRapper = (rapper) =>{
-    
-    this.setState({selectedRapper:rapper})
-    }
-  // this does nothing
-    // fetch(`http://localhost:3000/users/${this.state.user.id}`)
-    //   .then(response => response.json())
-    //   .then( 
-    //     this.setState({
-    //     selectedRapper: rapper
-    //   }))
-    
-
-  
 
 /**
 this only gets called when a rapper hits 0
 Creates log of the battle
 Setting state after post call to send the userinformation to the end game screen
- **/ 
+ **/
 endGame = (bossRapper,userRapper) => {
   console.log("endgame BossRapper", bossRapper, "user", userRapper)
   if (bossRapper === 0) {
-    
+
   const userWon =  {
 
-  user_id: this.state.user.id,
-  boss_id: this.state.bossRapper.id,
-  winner_id: this.state.user.id
+  user_id: this.props.user.id,
+  boss_id: this.props.bossRapper.id,
+  winner_id: this.props.user.id
   }
     fetch("http://localhost:3000/battles", {
-      method: "POST", 
+      method: "POST",
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(userWon)
     })
-    
-    
+
+
     this.props.history.push('/winner_end_game')
-    
+
   } else if (userRapper <= 0){
    this.props.history.push('/end_game')
 }
 }
 
- handleLogout = (event) => {
-    this.setState({userData: null})
-
-  }
-
   render() {
     return (
 
       <div className="App">
-             <NavBar 
-              user={this.state.user} 
-              logout={this.handleLogout} 
-              state={this.state}/>
-             <Switch>
+             <NavBar
+              user={this.props.user}
+              handleLogout={() => this.props.logout()}
+              />   
+           <Switch>
                 <Route exact
                         path='/'
                         render={()=>{
-                          
-                      return <Signin 
-                      submitUser={this.submitUser}
-                      setUser={this.setUser} />
+
+                      return <Signin
+                      setUser={this.props.setUser} />
                       }} />
 
-                <Route 
-                exact 
-                path='/new_user' 
+                <Route
+                exact
+                path='/new_user'
                 render={()=>{
-                  return <NewUser 
-                            user={this.state.user}
-                            setUser={this.setUser}
+                  return <NewUser
+                            user={this.props.user}
+                            setUser={this.props.setUser}
                             />}}
                           />
-                
-                <Route 
-                exact 
-                path='/select_rapper' 
+
+                <Route
+                exact
+                path='/select_rapper'
                 render={()=>{
-                  return <SelectCharCont 
-                            rapperList={this.state.rapperList}
-                            selectRapper={this.selectRapper}
+                  return <SelectCharCont
+                            rapperList={this.props.rapperList}
+                            selectRapper={this.props.selectRapper}
                             />}}
                         />
 
                 <Route exact path='/battle' render={()=>{
-                      return <BattleContainer 
-                                bossRapper={this.state.bossRapper}   
-                                selectedRapper={this.state.selectedRapper}
-                                user = {this.state.user}
+                      return <BattleContainer
+                                bossRapper={this.props.bossRapper}
+                                selectedRapper={this.props.selectedRapper}
+                                user = {this.props.user}
                                 endGame = {this.endGame}/>}}
                   />
                 <Route exact path='/winner_end_game' render={()=>{
-                     return <WinnerEndGame 
-                                selectedRapper={this.state.selectedRapper}
-                                bossRapper={this.state.bossRapper}/>}} 
+                     return <WinnerEndGame
+                                selectedRapper={this.props.selectedRapper}
+                                bossRapper={this.props.bossRapper}/>}}
                  />
 
                 <Route exact path='/end_game' render={()=>{
-                     return <EndGame 
-                                selectedRapper={this.state.selectedRapper}
-                                bossRapper={this.state.bossRapper}/>}} 
+                     return <EndGame
+                                selectedRapper={this.props.selectedRapper}
+                                bossRapper={this.props.bossRapper}/>}}
                  />
-                  
-                  
+
+
               </Switch>
       </div>
 
@@ -189,4 +121,18 @@ endGame = (bossRapper,userRapper) => {
   }
 }
 
-export default withRouter(App);
+const mapStateToProps = (state) => ({
+  user: state.user,
+  rapperList: state.rappers.list,
+  bossRapper: state.rappers.boss,
+  selectedRapper: state.rappers.selected
+})
+
+const mapDispatchToProps = {
+  setUser,
+  logout,
+  fetchRappers,
+  selectRapper
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));
