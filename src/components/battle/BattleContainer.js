@@ -187,6 +187,16 @@ onHandleSubmitAnswer = (questionAnswer,answer, turn, event) => {
   }
   
   
+handleGuessTheLyricWrong = () => {
+  const newLives = this.state.userRapperInfo.lives - 1
+  this.setState({
+    userRapperInfo: { ...this.state.userRapperInfo, lives: newLives }
+  })
+  if (newLives <= 0) {
+    this.props.endGame(this.state.bossRapperInfo.lives, newLives)
+  }
+}
+
 answerFeedback = (lyric) => {
   
   if (!!lyric === true) {
@@ -220,10 +230,6 @@ backgroundStyle=
         <Grid.Column>
         </Grid.Column>
         <Grid.Column verticalAlign='middle'>
-        <Segment>
-           <GuessTheLyric
-           selectedRapper = {this.state.userRapperInfo}/>
-        </Segment>
         <Segment>
           {/*if user tuturn then user information, else boss info*/}
             {this.state.userRapperInfo.myTurn === true
@@ -334,10 +340,20 @@ backgroundStyle=
 
 
         <Grid.Row columns={2}>
-        
-        
         </Grid.Row>
-        
+
+        <Grid.Row>
+          <Grid.Column width={16}>
+            <Segment>
+              <GuessTheLyric
+                selectedRapper={this.state.userRapperInfo}
+                lives={this.state.userRapperInfo.lives}
+                onWrongAnswer={this.handleGuessTheLyricWrong}
+              />
+            </Segment>
+          </Grid.Column>
+        </Grid.Row>
+
       </Grid>
       </div>  
   

@@ -1,6 +1,21 @@
 import React, { Component } from 'react'
 import { searchLyrics } from './services/lyricService'
 
+const MAX_HP = 3  // matches rapper lives from backend
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+function shuffle(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 class GuessTheLyric extends Component {
   constructor(props) {
     super(props)
@@ -10,16 +25,18 @@ class GuessTheLyric extends Component {
       searchError: null,
       hasSearched: false,
       songs: [],
-      selectedSong: null,
-      randomLine: null,
-      guess: '',
+      score: 0,
+      streak: 0,
+      round: null,
+      selectedChoice: null,
       result: null,
     }
     this.handleArtistChange = this.handleArtistChange.bind(this)
     this.handleSearch = this.handleSearch.bind(this)
-    this.handleSelectSong = this.handleSelectSong.bind(this)
-    this.handleGuessChange = this.handleGuessChange.bind(this)
-    this.handleGuess = this.handleGuess.bind(this)
+    this.handleChoiceSelect = this.handleChoiceSelect.bind(this)
+    this.startRound = this.startRound.bind(this)
+    this.nextRound = this.nextRound.bind(this)
+    this.restartGame = this.restartGame.bind(this)
   }
 
   componentDidMount() {
@@ -57,45 +74,62 @@ class GuessTheLyric extends Component {
       searchError: null,
       hasSearched: true,
       songs: [],
-      selectedSong: null,
-      randomLine: null,
+      round: null,
+      score: 0,
+      streak: 0,
+      selectedChoice: null,
       result: null,
     })
 
     try {
       const results = await searchLyrics({ q: artist })
       const songs = results.filter(
-        song => song.artistName.toLowerCase() === artist.toLowerCase()
+        song =>
+          song.artistName.toLowerCase().includes(artist.toLowerCase()) &&
+          song.plainLyrics
       )
-      this.setState({ songs, searching: false })
-
-      if (songs.length > 0) {
-        const song = songs[Math.floor(Math.random() * songs.length)]
-        this.handleSelectSong(song)
-      }
+      this.setState({ songs, searching: false }, () => {
+        if (songs.length >= 4) this.startRound()
+      })
     } catch (err) {
       this.setState({ searchError: err.message, searching: false })
     }
   }
 
-  handleSelectSong(song) {
-    const lines = song.plainLyrics?.split('\n').filter(Boolean)
-    const randomLine = lines ? lines[Math.floor(Math.random() * lines.length)] : null
-
-    this.setState({ selectedSong: song, randomLine, guess: '', result: null })
+  startRound() {
+    const { songs } = this.state
+    const correctSong = pickRandom(songs)
+    const lines = correctSong.plainLyrics.split('\n').filter(Boolean)
+    const lyricLine = pickRandom(lines)
+    const distractors = shuffle(songs.filter(s => s.id !== correctSong.id)).slice(0, 3)
+    const choices = shuffle([correctSong, ...distractors])
+    this.setState({ round: { correctSong, lyricLine, choices }, selectedChoice: null, result: null })
   }
 
-  handleGuessChange(e) {
-    this.setState({ guess: e.target.value })
+  handleChoiceSelect(song) {
+    const { round, score, streak } = this.state
+    const isCorrect = song.id === round.correctSong.id
+
+    if (isCorrect) {
+      const newStreak = streak + 1
+      this.setState({
+        selectedChoice: song,
+        result: 'correct',
+        score: score + 100 * newStreak,
+        streak: newStreak,
+      })
+    } else {
+      this.setState({ selectedChoice: song, result: 'wrong', streak: 0 })
+      if (this.props.onWrongAnswer) this.props.onWrongAnswer()
+    }
   }
 
-  handleGuess() {
-    const { guess, selectedSong } = this.state
-    const isCorrect = selectedSong?.trackName
-      .toLowerCase()
-      .includes(guess.toLowerCase())
+  nextRound() {
+    this.startRound()
+  }
 
-    this.setState({ result: isCorrect ? 'Correct!' : 'Wrong, try again!' })
+  restartGame() {
+    this.runSearch(this.state.artistQuery)
   }
 
   render() {
@@ -105,54 +139,117 @@ class GuessTheLyric extends Component {
       searchError,
       hasSearched,
       songs,
-      selectedSong,
-      randomLine,
-      guess,
+      score,
+      streak,
+      round,
+      selectedChoice,
       result,
     } = this.state
 
+    const lives = this.props.lives != null ? this.props.lives : MAX_HP
+    const gameOver = lives <= 0
+
     return (
-      <div>
-        <form onSubmit={this.handleSearch}>
-          <input
-            type="text"
-            value={artistQuery}
-            onChange={this.handleArtistChange}
-            placeholder="Search an artist..."
-          />
-          <button type="submit">Search Artist</button>
-        </form>
-
+      <div style={{ maxWidth: 600, margin: '0 auto', padding: 20, fontFamily: 'monospace' }}>
         {searching && <p>Searching...</p>}
-        {searchError && <p>Error: {searchError}</p>}
-
-        {hasSearched && !searching && !searchError && songs.length === 0 && (
-          <p>No songs found for "{artistQuery}".</p>
+        {searchError && <p style={{ color: 'red' }}>Error: {searchError}</p>}
+        {hasSearched && !searching && !searchError && songs.length < 4 && (
+          <p>Not enough songs found to play.</p>
         )}
 
-        {!selectedSong && songs.length > 0 && (
-          <ul>
-            {songs.map(song => (
-              <li key={song.id}>
-                <button onClick={() => this.handleSelectSong(song)}>
-                  {song.trackName}{song.albumName ? ` (${song.albumName})` : ''}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {selectedSong && randomLine && (
+        {round && (
           <div>
-            <p><em>"{randomLine}"</em></p>
-            <input
-              type="text"
-              value={guess}
-              onChange={this.handleGuessChange}
-              placeholder="Name that song..."
-            />
-            <button onClick={this.handleGuess}>Submit Guess</button>
-            {result && <p>{result}</p>}
+            {/* HUD */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', margin: '16px 0' }}>
+              <span style={{ fontWeight: 'bold', marginRight: 12 }}>Score: {score}</span>
+              {streak > 1 && (
+                <span style={{ color: '#f57c00', fontWeight: 'bold' }}>{streak}x streak!</span>
+              )}
+            </div>
+
+            {/* Lyric prompt */}
+            <div style={{
+              background: '#1a1a2e',
+              color: '#e0e0e0',
+              padding: '20px 24px',
+              borderRadius: 10,
+              margin: '12px 0',
+              fontSize: 18,
+              textAlign: 'center',
+              lineHeight: 1.5,
+              border: '2px solid #3f3f6e',
+            }}>
+              <em>"{round.lyricLine}"</em>
+            </div>
+            <p style={{ textAlign: 'center', color: '#666', marginBottom: 12 }}>Which song is this from?</p>
+
+            {/* Choices */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {round.choices.map((song, i) => {
+                let bg = '#f0f0f0'
+                let border = '2px solid #bbb'
+                if (selectedChoice) {
+                  if (song.id === round.correctSong.id) {
+                    bg = '#c8e6c9'
+                    border = '2px solid #388e3c'
+                  } else if (selectedChoice.id === song.id) {
+                    bg = '#ffcdd2'
+                    border = '2px solid #d32f2f'
+                  }
+                }
+                return (
+                  <button
+                    key={song.id}
+                    onClick={() => !selectedChoice && this.handleChoiceSelect(song)}
+                    style={{
+                      background: bg,
+                      border,
+                      borderRadius: 8,
+                      padding: '14px 10px',
+                      fontSize: 13,
+                      cursor: selectedChoice ? 'default' : 'pointer',
+                      fontWeight: 'bold',
+                      textAlign: 'left',
+                      transition: 'background 0.2s',
+                    }}
+                  >
+                    <span style={{ marginRight: 8, opacity: 0.6 }}>{['A', 'B', 'C', 'D'][i]}.</span>
+                    {song.trackName}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Feedback */}
+            {result && !gameOver && (
+              <div style={{ textAlign: 'center', marginTop: 20 }}>
+                <p style={{ fontSize: 18, fontWeight: 'bold', color: result === 'correct' ? '#388e3c' : '#d32f2f' }}>
+                  {result === 'correct'
+                    ? `Correct! +${100 * streak}`
+                    : `Wrong! It was "${round.correctSong.trackName}"`}
+                </p>
+                <button
+                  onClick={this.nextRound}
+                  style={{ padding: '8px 28px', fontSize: 15, cursor: 'pointer', borderRadius: 6 }}
+                >
+                  Next Round
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Game Over */}
+        {gameOver && (
+          <div style={{ textAlign: 'center', marginTop: 40 }}>
+            <h2 style={{ fontSize: 32, marginBottom: 8 }}>Game Over</h2>
+            <p style={{ fontSize: 20, marginBottom: 20 }}>Final Score: <strong>{score}</strong></p>
+            <button
+              onClick={this.restartGame}
+              style={{ padding: '10px 32px', fontSize: 16, cursor: 'pointer', borderRadius: 6 }}
+            >
+              Play Again
+            </button>
           </div>
         )}
       </div>
