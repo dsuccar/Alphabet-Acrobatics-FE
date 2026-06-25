@@ -4,11 +4,12 @@ import BossCard from './BossCard'
 import GuessTheLyric from '../GuessTheLyric'
 import React from 'react'
 import update from 'immutability-helper'
+import { withRouter } from 'react-router-dom'
 
 import { Grid, Segment, Image } from 'semantic-ui-react'
 // import { Card } from 'semantic-ui-react'
 
-export default class BattleContainer extends React.Component {
+class BattleContainer extends React.Component {
 
   constructor(){
     super()
@@ -29,50 +30,56 @@ export default class BattleContainer extends React.Component {
         myTurn: null
       },
       bossRapperLyrics: null,
-     
     }
 
   }
 
   componentDidMount(){
-    
+    this._isMounted = true
 
-    // fetch(`http://localhost:3000/rappers/${this.props.selectedRapper.id}`)
+    if (!this.props.selectedRapper || !this.props.bossRapper) {
+      this.props.history.push('/select_rapper')
+      return
+    }
+
     fetch(`http://localhost:3000/rappers/${this.props.selectedRapper.id}`)
     .then(resp => resp.json())
-  .then(userRapper => this.setState({
-    userRapperInfo: {
-      name: userRapper.name,
-      bio: userRapper.bio,
-      lives: userRapper.lives,
-      hometown: userRapper.hometown,
-      myTurn: true,
-      isTrue: null,
-      gif: userRapper.gif
-
-    },
-    userRapperLyrics: userRapper.lyrics
+    .then(userRapper => {
+      if (this._isMounted) this.setState({
+        userRapperInfo: {
+          name: userRapper.name,
+          bio: userRapper.bio,
+          lives: userRapper.lives,
+          hometown: userRapper.hometown,
+          myTurn: true,
+          isTrue: null,
+          gif: userRapper.gif
+        },
+        userRapperLyrics: userRapper.lyrics
+      })
     })
-  )
-  
-  fetch(`http://localhost:3000/rappers/${this.props.bossRapper.id}`)
-  .then(resp => resp.json())
-  .then(bossRapper => this.setState({
-    bossRapperInfo: {
-      name: bossRapper.name,
-      bio: bossRapper.bio,
-      lives: bossRapper.lives,
-      hometown: bossRapper.hometown,
-      myTurn: false,
-      isTrue: null,
-      gif: bossRapper.gif
-    },
-    bossRapperLyrics: bossRapper.lyrics
 
-  })
-  )
-  
-} 
+    fetch(`http://localhost:3000/rappers/${this.props.bossRapper.id}`)
+    .then(resp => resp.json())
+    .then(bossRapper => {
+      if (this._isMounted) this.setState({
+        bossRapperInfo: {
+          name: bossRapper.name,
+          bio: bossRapper.bio,
+          lives: bossRapper.lives,
+          hometown: bossRapper.hometown,
+          myTurn: false,
+          isTrue: null,
+          gif: bossRapper.gif
+        },
+        bossRapperLyrics: bossRapper.lyrics,
+      })
+    })
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false
+  }
 
 
 
@@ -106,14 +113,14 @@ onHandleSubmitAnswer = (questionAnswer,answer, turn, event) => {
       // User Correct
       this.setState({
         ...this.state,
-        userRapperInfo: { 
-          ...this.state.userRapperInfo, 
-          myTurn: !this.state.userRapperInfo.myTurn, 
+        userRapperInfo: {
+          ...this.state.userRapperInfo,
+          myTurn: !this.state.userRapperInfo.myTurn,
           isTrue: true
         },
-        bossRapperInfo:{ 
-          ...this.state.bossRapperInfo, 
-          lives: this.state.bossRapperInfo.lives - 1, 
+        bossRapperInfo:{
+          ...this.state.bossRapperInfo,
+          lives: this.state.bossRapperInfo.lives - 1,
           isTrue: null,
           myTurn: !this.state.bossRapperInfo.myTurn,
         },
@@ -187,6 +194,16 @@ onHandleSubmitAnswer = (questionAnswer,answer, turn, event) => {
   }
   
   
+handleGuessTheLyricCorrect = () => {
+  const newLives = this.state.bossRapperInfo.lives - 1
+  this.setState({
+    bossRapperInfo: { ...this.state.bossRapperInfo, lives: newLives },
+  })
+  if (newLives <= 0) {
+    this.props.endGame(newLives, this.state.userRapperInfo.lives)
+  }
+}
+
 handleGuessTheLyricWrong = () => {
   const newLives = this.state.userRapperInfo.lives - 1
   this.setState({
@@ -330,7 +347,7 @@ backgroundStyle=
         </Grid.Column>
         <Grid.Column>
           <Segment>
-        <BossCard 
+        <BossCard
             bossRapperInfo={this.state.bossRapperInfo}
             bossRapperLyrics={this.state.bossRapperLyrics}/>
            </Segment>  
@@ -348,6 +365,7 @@ backgroundStyle=
               <GuessTheLyric
                 selectedRapper={this.state.userRapperInfo}
                 lives={this.state.userRapperInfo.lives}
+                onCorrectAnswer={this.handleGuessTheLyricCorrect}
                 onWrongAnswer={this.handleGuessTheLyricWrong}
               />
             </Segment>
@@ -360,6 +378,6 @@ backgroundStyle=
   )
 
   }
-  }
+}
 
-
+export default withRouter(BattleContainer)

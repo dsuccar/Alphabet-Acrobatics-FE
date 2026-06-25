@@ -7,6 +7,12 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
+const CURSE_WORDS = /\b(fuck|shit|bitch|nigga|nigger|ass|damn|hell|crap|bastard|dick|cock|pussy|cunt|whore|slut|piss|motherfuck|faggot|retard)\b/i
+
+function isCleanLine(line) {
+  return !CURSE_WORDS.test(line) && !/[()]/.test(line)
+}
+
 function shuffle(arr) {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
@@ -25,8 +31,6 @@ class GuessTheLyric extends Component {
       searchError: null,
       hasSearched: false,
       songs: [],
-      score: 0,
-      streak: 0,
       round: null,
       selectedChoice: null,
       result: null,
@@ -40,7 +44,12 @@ class GuessTheLyric extends Component {
   }
 
   componentDidMount() {
+    this._isMounted = true
     this.autoSearchSelectedRapper()
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false
   }
 
   componentDidUpdate(prevProps) {
@@ -75,8 +84,6 @@ class GuessTheLyric extends Component {
       hasSearched: true,
       songs: [],
       round: null,
-      score: 0,
-      streak: 0,
       selectedChoice: null,
       result: null,
     })
@@ -88,18 +95,27 @@ class GuessTheLyric extends Component {
           song.artistName.toLowerCase().includes(artist.toLowerCase()) &&
           song.plainLyrics
       )
-      this.setState({ songs, searching: false }, () => {
-        if (songs.length >= 4) this.startRound()
-      })
+      if (this._isMounted) {
+        this.setState({ songs, searching: false }, () => {
+          if (songs.length >= 4) this.startRound()
+        })
+      }
     } catch (err) {
-      this.setState({ searchError: err.message, searching: false })
+      if (this._isMounted) {
+        this.setState({ searchError: err.message, searching: false })
+      }
     }
   }
 
   startRound() {
     const { songs } = this.state
     const correctSong = pickRandom(songs)
-    const lines = correctSong.plainLyrics.split('\n').filter(Boolean)
+    console.log('Correct answer:', correctSong.trackName)
+    const lines = correctSong.plainLyrics.split('\n').filter(line => line.trim() && isCleanLine(line))
+    if (lines.length === 0) {
+      this.startRound()
+      return
+    }
     const lyricLine = pickRandom(lines)
     const distractors = shuffle(songs.filter(s => s.id !== correctSong.id)).slice(0, 3)
     const choices = shuffle([correctSong, ...distractors])
@@ -107,19 +123,14 @@ class GuessTheLyric extends Component {
   }
 
   handleChoiceSelect(song) {
-    const { round, score, streak } = this.state
+    const { round } = this.state
     const isCorrect = song.id === round.correctSong.id
 
     if (isCorrect) {
-      const newStreak = streak + 1
-      this.setState({
-        selectedChoice: song,
-        result: 'correct',
-        score: score + 100 * newStreak,
-        streak: newStreak,
-      })
+      this.setState({ selectedChoice: song, result: 'correct' })
+      if (this.props.onCorrectAnswer) this.props.onCorrectAnswer()
     } else {
-      this.setState({ selectedChoice: song, result: 'wrong', streak: 0 })
+      this.setState({ selectedChoice: song, result: 'wrong' })
       if (this.props.onWrongAnswer) this.props.onWrongAnswer()
     }
   }
@@ -139,8 +150,6 @@ class GuessTheLyric extends Component {
       searchError,
       hasSearched,
       songs,
-      score,
-      streak,
       round,
       selectedChoice,
       result,
@@ -159,13 +168,6 @@ class GuessTheLyric extends Component {
 
         {round && (
           <div>
-            {/* HUD */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', margin: '16px 0' }}>
-              <span style={{ fontWeight: 'bold', marginRight: 12 }}>Score: {score}</span>
-              {streak > 1 && (
-                <span style={{ color: '#f57c00', fontWeight: 'bold' }}>{streak}x streak!</span>
-              )}
-            </div>
 
             {/* Lyric prompt */}
             <div style={{
@@ -182,6 +184,7 @@ class GuessTheLyric extends Component {
               <em>"{round.lyricLine}"</em>
             </div>
             <p style={{ textAlign: 'center', color: '#666', marginBottom: 12 }}>Which song is this from?</p>
+            <p style={{ textAlign: 'center', color: '#aaa', fontSize: 12, marginBottom: 8 }}>[Answer: {round.correctSong.trackName}]</p>
 
             {/* Choices */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -225,7 +228,7 @@ class GuessTheLyric extends Component {
               <div style={{ textAlign: 'center', marginTop: 20 }}>
                 <p style={{ fontSize: 18, fontWeight: 'bold', color: result === 'correct' ? '#388e3c' : '#d32f2f' }}>
                   {result === 'correct'
-                    ? `Correct! +${100 * streak}`
+                    ? `Hit! Boss takes damage.`
                     : `Wrong! It was "${round.correctSong.trackName}"`}
                 </p>
                 <button
@@ -239,19 +242,6 @@ class GuessTheLyric extends Component {
           </div>
         )}
 
-        {/* Game Over */}
-        {gameOver && (
-          <div style={{ textAlign: 'center', marginTop: 40 }}>
-            <h2 style={{ fontSize: 32, marginBottom: 8 }}>Game Over</h2>
-            <p style={{ fontSize: 20, marginBottom: 20 }}>Final Score: <strong>{score}</strong></p>
-            <button
-              onClick={this.restartGame}
-              style={{ padding: '10px 32px', fontSize: 16, cursor: 'pointer', borderRadius: 6 }}
-            >
-              Play Again
-            </button>
-          </div>
-        )}
       </div>
     )
   }

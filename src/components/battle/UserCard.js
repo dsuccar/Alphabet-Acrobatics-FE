@@ -20,13 +20,13 @@ export default class UserCard extends React.Component {
 myTurnStyle = {
   border: "8px solid",
   borderColor: "#db4848",
-  height: "440px",
-  padding: "140px 0px"
+  minHeight: "560px",
+  padding: "40px 0px"
 
 }
 theirTurnStyle = {
-  height: "440px",
-  padding: "140px 0px"
+  minHeight: "560px",
+  padding: "40px 0px"
 }
 boarderStyle = {
   padding: "0px 0px"
@@ -34,7 +34,6 @@ boarderStyle = {
 
  
  render() {
-console.log("user card name",this.props.userRapperInfo)
     return (
     
       <div>
@@ -57,10 +56,8 @@ console.log("user card name",this.props.userRapperInfo)
       <Grid.Column style={this.myTurnStyle}>
       <Image src={this.props.userRapperInfo.gif} style={{padding: "40px"}} centered ></Image>
         <h1>{this.props.userRapperInfo.name}</h1>
-        
         <Image.Group>
         {[...Array(this.props.userRapperInfo.lives).keys()].map( (heart) => <Image src={"/Images/heart-sprite.png"} key={heart} size='mini'/> )}
-
         </Image.Group>
       </Grid.Column>
       </Grid.Row>
