@@ -36,7 +36,7 @@ class NewUser extends React.Component {
   this.props.history.push('/select_rapper')
 })
 }
-  
+
   handleChange = (event) => {
     this.setState({
       [event.target.name]: event.target.value
@@ -46,48 +46,48 @@ class NewUser extends React.Component {
     paddingTop: "100px"
   }
 
-  
+
   render() {
     console.log(this.state)
     return (
 
       <Grid columns='equal' style={this.newUser}>
       <Grid.Column >
-        
+
       </Grid.Column>
       <Grid.Column >
         <Segment >
           <Segment placeholder >
           <Grid columns={2}  >
-            
+
             <Grid.Column verticalAlign='middle'>
-              <Button content='Sign In' 
-              icon='sign-in' 
-              size='big' 
-               as={Link} 
-               to="/" 
+              <Button content='Sign In'
+              icon='sign-in'
+              size='big'
+               as={Link}
+               to="/"
                />
             </Grid.Column>
-          
+
           <Grid.Column >
             <h1>New User:</h1>
               <Form>
                 <Form.Input
-                  placeholder='Username' 
-                  name='username' 
-                  type='text' 
+                  placeholder='Username'
+                  name='username'
+                  type='text'
                   onChange={this.handleChange}
                 />
                 <Form.Input
-                placeholder='password' 
-                name='password' 
-                type='text' 
-                onChange={this.handleChange} 
+                placeholder='password'
+                name='password'
+                type='text'
+                onChange={this.handleChange}
               />
-        
-                <Button 
-                content='submit' 
-                value='Sign In' 
+
+                <Button
+                content='submit'
+                value='Sign In'
                 onClick={this.handleSubmit} />
               </Form>
             </Grid.Column>

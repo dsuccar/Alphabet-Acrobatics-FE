@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { searchLyrics } from './services/lyricService'
+import { searchLyrics } from '../services/lyricService'
 
 const MAX_HP = 3  // matches rapper lives from backend
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import RapperCard from './RapperCard'
+import RapperCard from '../components/RapperCard'
 import { Grid } from 'semantic-ui-react'
 
 
@@ -9,12 +9,11 @@ import { Grid } from 'semantic-ui-react'
       this.state = {
         searchTerm: ''
       }
-    
+
   }
 
 
-    
-  
+
 
   selectCharStyle = {
     paddingTop: "12px"
@@ -23,25 +22,25 @@ import { Grid } from 'semantic-ui-react'
   backgroundStyle=
   {backgroundImage: `url('${'/images/selectcharbackground.jpg'}')`,
   backgroundAttachment: 'fixed',
-  backgroundSize: 'cover', 
+  backgroundSize: 'cover',
   padding: 100,
   height: 1000}
 
   render(){
     return(
       <div style={this.backgroundStyle} className="course-image">
-        <Grid>  
+        <Grid>
           <Grid.Row columns={3}>
-          {this.props.rapperList.map(rapper => 
-          
+          {this.props.rapperList.map(rapper =>
+
           <Grid.Column key={rapper.id} style={this.selectCharStyle}>
-            <RapperCard 
+            <RapperCard
             rapper={rapper}
             selectRapper={this.props.selectRapper}
           />
             </Grid.Column>
-            )}      
-          </Grid.Row>     
+            )}
+          </Grid.Row>
       </Grid>
     </div>
     )

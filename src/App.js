@@ -2,16 +2,16 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import './App.css';
-import Signin from './components/sign-In/Signin'
-import NewUser from './components/sign-In/NewUser'
+import Signin from './pages/SignIn'
+import NewUser from './pages/NewUser'
 import NavBar from './components/NavBar';
-import SelectCharCont from './components/character_selection/SelectRapperScreen'
-import BattleContainer from './components/battle/BattleContainer'
-import EndGame from './components/EndGame'
-import WinnerEndGame from './components/WinnerEndGame'
+import SelectCharCont from './pages/SelectRapperScreen'
+import BattleContainer from './pages/BattleContainer'
+import EndGame from './pages/EndGame'
+import WinnerEndGame from './pages/WinnerEndGame'
 import { Route, withRouter, Switch } from 'react-router-dom'
 import { setUser, logout } from './store/userSlice'
-import { fetchRappers, selectRapper } from './store/rappersSlice'
+import { fetchRappers, selectRapper, advanceBoss } from './store/rappersSlice'
 
 
 
@@ -102,13 +102,17 @@ endGame = (bossRapper,userRapper) => {
                 <Route exact path='/winner_end_game' render={()=>{
                      return <WinnerEndGame
                                 selectedRapper={this.props.selectedRapper}
-                                bossRapper={this.props.bossRapper}/>}}
+                                bossRapper={this.props.bossRapper}
+                                hasNextBoss={this.props.hasNextBoss}
+                                advanceBoss={this.props.advanceBoss}/>}}
                  />
 
                 <Route exact path='/end_game' render={()=>{
                      return <EndGame
                                 selectedRapper={this.props.selectedRapper}
-                                bossRapper={this.props.bossRapper}/>}}
+                                bossRapper={this.props.bossRapper}
+                                hasNextBoss={this.props.hasNextBoss}
+                                advanceBoss={this.props.advanceBoss}/>}}
                  />
 
 
@@ -125,14 +129,16 @@ const mapStateToProps = (state) => ({
   user: state.user,
   rapperList: state.rappers.list,
   bossRapper: state.rappers.boss,
-  selectedRapper: state.rappers.selected
+  selectedRapper: state.rappers.selected,
+  hasNextBoss: state.rappers.bossIndex < state.rappers.bossList.length - 1
 })
 
 const mapDispatchToProps = {
   setUser,
   logout,
   fetchRappers,
-  selectRapper
+  selectRapper,
+  advanceBoss
 }
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));
