@@ -31,6 +31,7 @@ class GuessTheLyric extends Component {
       searchError: null,
       hasSearched: false,
       songs: [],
+      usedSongIds: [],
       round: null,
       selectedChoice: null,
       result: null,
@@ -83,6 +84,7 @@ class GuessTheLyric extends Component {
       searchError: null,
       hasSearched: true,
       songs: [],
+      usedSongIds: [],
       round: null,
       selectedChoice: null,
       result: null,
@@ -90,11 +92,18 @@ class GuessTheLyric extends Component {
 
     try {
       const results = await searchLyrics({ q: artist })
-      const songs = results.filter(
-        song =>
-          song.artistName.toLowerCase().includes(artist.toLowerCase()) &&
-          song.plainLyrics
-      )
+      const seenTracks = new Set()
+      const songs = results.filter(song => {
+        if (
+          !song.artistName.toLowerCase().includes(artist.toLowerCase()) ||
+          !song.plainLyrics
+        ) return false
+
+        const key = song.trackName.trim().toLowerCase()
+        if (seenTracks.has(key)) return false
+        seenTracks.add(key)
+        return true
+      })
       if (this._isMounted) {
         this.setState({ songs, searching: false }, () => {
           if (songs.length >= 4) this.startRound()
@@ -108,8 +117,10 @@ class GuessTheLyric extends Component {
   }
 
   startRound() {
-    const { songs } = this.state
-    const correctSong = pickRandom(songs)
+    const { songs, usedSongIds } = this.state
+    const pool = songs.filter(s => !usedSongIds.includes(s.id))
+    const availableSongs = pool.length > 0 ? pool : songs
+    const correctSong = pickRandom(availableSongs)
     console.log('Correct answer:', correctSong.trackName)
     const lines = correctSong.plainLyrics.split('\n').filter(line => line.trim() && isCleanLine(line))
     if (lines.length === 0) {
@@ -119,7 +130,8 @@ class GuessTheLyric extends Component {
     const lyricLine = pickRandom(lines)
     const distractors = shuffle(songs.filter(s => s.id !== correctSong.id)).slice(0, 3)
     const choices = shuffle([correctSong, ...distractors])
-    this.setState({ round: { correctSong, lyricLine, choices }, selectedChoice: null, result: null })
+    const nextUsedSongIds = pool.length > 0 ? [...usedSongIds, correctSong.id] : [correctSong.id]
+    this.setState({ round: { correctSong, lyricLine, choices }, selectedChoice: null, result: null, usedSongIds: nextUsedSongIds })
   }
 
   handleChoiceSelect(song) {

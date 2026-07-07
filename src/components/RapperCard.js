@@ -1,31 +1,21 @@
 import React from 'react'
 import { Card, Image } from 'semantic-ui-react'
-import { withRouter } from 'react-router-dom';
 
  class RapperCard extends React.Component {
-  constructor(){
-    super()
-    this.state = {
-      selectedRapper: ''
+
+    highlightStyle = {
+      border: '4px solid #db4848',
+      boxShadow: '0 0 20px rgba(219, 72, 72, 0.8)'
     }
 
-  }
-
-
-    handleClick = (test) => {
-      this.props.selectRapper(this.props.rapper)
-      this.props.history.push("battle")
-
+    handleClick = () => {
+      this.props.onSelect(this.props.rapper)
     }
-
-
-    l
 
   render(){
-    // debugger
     return(
       <div style={{padding: "50px"}}>
-   <Card onClick={this.handleClick}  centered>
+   <Card onClick={this.handleClick} centered style={this.props.isSelected ? this.highlightStyle : undefined}>
       <Card.Content>
       <Image src={this.props.rapper.gif} centered ></Image>
       <Card.Header>{this.props.rapper.name}</Card.Header>
@@ -42,4 +32,4 @@ import { withRouter } from 'react-router-dom';
   }
 
 }
-export default withRouter(RapperCard)
+export default RapperCard

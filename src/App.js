@@ -31,6 +31,11 @@ Setting state after post call to send the userinformation to the end game screen
  **/
 endGame = (bossRapper,userRapper) => {
   console.log("endgame BossRapper", bossRapper, "user", userRapper)
+  if (!this.props.user || !this.props.bossRapper) {
+    this.props.history.push('/')
+    return
+  }
+
   if (bossRapper === 0) {
 
   const userWon =  {
@@ -113,6 +118,16 @@ endGame = (bossRapper,userRapper) => {
                                 bossRapper={this.props.bossRapper}
                                 hasNextBoss={this.props.hasNextBoss}
                                 advanceBoss={this.props.advanceBoss}/>}}
+                 />
+
+                <Route exact path='/winner_preview' render={()=>{
+                     const mockRapper = { name: 'Eminem', gif: '/Gifs/eminem.gif' }
+                     const mockBoss   = { name: 'Jay-Z',  gif: '/Gifs/goat.gif'   }
+                     return <WinnerEndGame
+                                selectedRapper={mockRapper}
+                                bossRapper={mockBoss}
+                                hasNextBoss={false}
+                                advanceBoss={() => {}}/>}}
                  />
 
 
