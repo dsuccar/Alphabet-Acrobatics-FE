@@ -5,6 +5,11 @@ export const fetchRappers = createAsyncThunk('rappers/fetch', async () => {
   return resp.json()
 })
 
+export const fetchNextBoss = createAsyncThunk('rappers/fetchNextBoss', async ({ userId, rapperId }) => {
+  const resp = await fetch(`http://localhost:3000/users/${userId}/get_boss?rapper_id=${rapperId}`)
+  return resp.json()
+})
+
 const rappersSlice = createSlice({
   name: 'rappers',
   initialState: {
@@ -12,7 +17,8 @@ const rappersSlice = createSlice({
     bossList: [],
     bossIndex: 0,
     boss: null,
-    selected: null
+    selected: null,
+    beatenBossIds: []
   },
   reducers: {
     selectRapper: (state, action) => {
@@ -35,6 +41,22 @@ const rappersSlice = createSlice({
       state.bossList = bosses
       state.bossIndex = 0
       state.boss = bosses[0] || null
+    })
+    builder.addCase(fetchNextBoss.fulfilled, (state, action) => {
+      const { boss, beaten_boss_ids } = action.payload
+      state.beatenBossIds = beaten_boss_ids || []
+
+      if (boss) {
+        const idx = state.bossList.findIndex(b => b.id === boss.id)
+        if (idx !== -1) {
+          state.bossIndex = idx
+          state.boss = state.bossList[idx]
+        }
+      } else if (state.bossList.length > 0) {
+        // every boss already beaten
+        state.bossIndex = state.bossList.length
+        state.boss = null
+      }
     })
   }
 })

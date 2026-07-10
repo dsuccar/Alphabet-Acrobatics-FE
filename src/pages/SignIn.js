@@ -39,7 +39,7 @@ class Signin extends Component {
            if( pastUser.username === user.username &&
             pastUser.password === user.password) {
 
-      this.props.setUser({pastUser})
+      this.props.setUser(pastUser)
       this.props.history.push(`/select_rapper`)
           } else {
             this.setState({error : "The username or password you've entered is incorrect."})

@@ -19,8 +19,15 @@ import { withRouter } from 'react-router-dom'
   }
 
   beginBattle = () => {
-    this.props.selectRapper(this.state.selectedRapper)
-    this.props.history.push('/battle')
+    const rapper = this.state.selectedRapper
+    this.props.selectRapper(rapper)
+
+    if (this.props.user && this.props.user.id) {
+      this.props.fetchNextBoss({ userId: this.props.user.id, rapperId: rapper.id })
+        .then(() => this.props.history.push('/battle'))
+    } else {
+      this.props.history.push('/battle')
+    }
   }
 
   selectCharStyle = {

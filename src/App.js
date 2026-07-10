@@ -7,11 +7,10 @@ import NewUser from './pages/NewUser'
 import NavBar from './components/NavBar';
 import SelectCharCont from './pages/SelectRapperScreen'
 import BattleContainer from './pages/BattleContainer'
-import EndGame from './pages/EndGame'
-import WinnerEndGame from './pages/WinnerEndGame'
+import GameOverScreen from './pages/GameOverScreen'
 import { Route, withRouter, Switch } from 'react-router-dom'
 import { setUser, logout } from './store/userSlice'
-import { fetchRappers, selectRapper, advanceBoss } from './store/rappersSlice'
+import { fetchRappers, fetchNextBoss, selectRapper, advanceBoss } from './store/rappersSlice'
 
 
 
@@ -22,7 +21,6 @@ class App extends React.Component {
   componentDidMount(){
     this.props.fetchRappers()
   }
-
 
 /**
 this only gets called when a rapper hits 0
@@ -42,7 +40,8 @@ endGame = (bossRapper,userRapper) => {
 
   user_id: this.props.user.id,
   boss_id: this.props.bossRapper.id,
-  winner_id: this.props.user.id
+  winner_id: this.props.user.id,
+  rapper_id: this.props.selectedRapper.id
   }
     fetch("http://localhost:3000/battles", {
       method: "POST",
@@ -94,6 +93,8 @@ endGame = (bossRapper,userRapper) => {
                   return <SelectCharCont
                             rapperList={this.props.rapperList}
                             selectRapper={this.props.selectRapper}
+                            user={this.props.user}
+                            fetchNextBoss={this.props.fetchNextBoss}
                             />}}
                         />
 
@@ -105,29 +106,35 @@ endGame = (bossRapper,userRapper) => {
                                 endGame = {this.endGame}/>}}
                   />
                 <Route exact path='/winner_end_game' render={()=>{
-                     return <WinnerEndGame
+                     return <GameOverScreen
+                                won={true}
                                 selectedRapper={this.props.selectedRapper}
                                 bossRapper={this.props.bossRapper}
                                 hasNextBoss={this.props.hasNextBoss}
-                                advanceBoss={this.props.advanceBoss}/>}}
+                                advanceBoss={this.props.advanceBoss}
+                                logout={this.props.logout}/>}}
                  />
 
                 <Route exact path='/end_game' render={()=>{
-                     return <EndGame
+                     return <GameOverScreen
+                                won={false}
                                 selectedRapper={this.props.selectedRapper}
                                 bossRapper={this.props.bossRapper}
                                 hasNextBoss={this.props.hasNextBoss}
-                                advanceBoss={this.props.advanceBoss}/>}}
+                                advanceBoss={this.props.advanceBoss}
+                                logout={this.props.logout}/>}}
                  />
 
                 <Route exact path='/winner_preview' render={()=>{
                      const mockRapper = { name: 'Eminem', gif: '/Gifs/eminem.gif' }
                      const mockBoss   = { name: 'Jay-Z',  gif: '/Gifs/goat.gif'   }
-                     return <WinnerEndGame
+                     return <GameOverScreen
+                                won={true}
                                 selectedRapper={mockRapper}
                                 bossRapper={mockBoss}
                                 hasNextBoss={false}
-                                advanceBoss={() => {}}/>}}
+                                advanceBoss={() => {}}
+                                logout={() => {}}/>}}
                  />
 
 
@@ -152,6 +159,7 @@ const mapDispatchToProps = {
   setUser,
   logout,
   fetchRappers,
+  fetchNextBoss,
   selectRapper,
   advanceBoss
 }
